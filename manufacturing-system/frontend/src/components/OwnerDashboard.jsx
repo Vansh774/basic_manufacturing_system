@@ -2,6 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getMachines, getMachineStats, getTodayProduction, getProductionByDate, logout } from '../services/api';
 import toast from 'react-hot-toast';
+import DowntimeAnalytics from './DowntimeAnalytics';
+import MostStoppedMachines from './MostStoppedMachines';
+import AlertNotificationBell from './AlertNotificationBell';
 
 const OwnerDashboard = () => {
     const [machines, setMachines] = useState([]);
@@ -10,6 +13,7 @@ const OwnerDashboard = () => {
     const [todayProductionDetails, setTodayProductionDetails] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showProductionModal, setShowProductionModal] = useState(false);
+    const [analyticsRefreshTrigger, setAnalyticsRefreshTrigger] = useState(0);
     const navigate = useNavigate();
 
     // Helper function to format numbers
@@ -158,7 +162,8 @@ const OwnerDashboard = () => {
                             <h1 className="text-2xl font-bold text-blue-600">Owner Dashboard</h1>
                             <p className="text-sm text-gray-600">Factory Management System</p>
                         </div>
-                        <div className="flex space-x-4">
+                        <div className="flex items-center space-x-4">
+                            <AlertNotificationBell onAlert={() => { fetchData(); setAnalyticsRefreshTrigger(prev => prev + 1); }} />
                             <button
                                 onClick={() => navigate('/reports')}
                                 className="bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-600 transition"
@@ -315,6 +320,12 @@ const OwnerDashboard = () => {
                         </table>
                     </div>
                 </div>
+
+                {/* Downtime Analytics & Production Loss Report */}
+                <DowntimeAnalytics refreshTrigger={analyticsRefreshTrigger} />
+
+                {/* Machine Stoppage Analysis (Most Stopped Machines & Reasons) */}
+                <MostStoppedMachines refreshTrigger={analyticsRefreshTrigger} />
             </div>
 
             {/* Production Breakdown Modal */}

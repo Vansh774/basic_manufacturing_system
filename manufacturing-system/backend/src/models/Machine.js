@@ -97,18 +97,31 @@ const Machine = {
                 params = [status, operatorId, id];
                 
                 // Calculate loss ONLY if this was a manual stop (not "Day start reset")
+                // Resolve any open downtime entries for this machine
+                const calculatedDowntime = downtimeStartTime ? Math.max(1, Math.floor((new Date() - new Date(downtimeStartTime)) / (1000 * 60))) : null;
+                await pool.query(`
+                    UPDATE downtime_entries
+                    SET end_time = CURRENT_TIMESTAMP,
+                        duration = COALESCE($1, GREATEST(1, ROUND(EXTRACT(EPOCH FROM (CURRENT_TIMESTAMP - start_time)) / 60))),
+                        status = 'resolved',
+                        resolved_by = $2,
+                        resolved_at = CURRENT_TIMESTAMP
+                    WHERE machine_id = $3 AND status = 'open'
+                `, [calculatedDowntime, operatorId, id]);
+
+                // Calculate loss ONLY if this was a manual stop (not "Day start reset")
                 const isPlannedStop = currentReason === 'Day start reset';
                 
                 if (oldStatus === 'stopped' && downtimeStartTime && !isPlannedStop) {
                     const startTime = new Date(downtimeStartTime);
                     const endTime = new Date();
-                    const downtimeMinutes = Math.floor((endTime - startTime) / (1000 * 60));
+                    const downtimeMinutes = Math.max(1, Math.floor((endTime - startTime) / (1000 * 60)));
                     
                     if (downtimeMinutes > 0) {
                         // Get current settings for calculations
                         const unitPrice = parseFloat(await getSetting('unit_price', '4000'));
-                        
-                        const lossQuantity = Math.floor((productionRate / 60) * downtimeMinutes);
+                        const rate = productionRate || 500;
+                        const lossQuantity = Math.floor((rate / 60) * downtimeMinutes);
                         const lossAmount = lossQuantity * unitPrice;
                         
                         console.log(`Calculating loss: ${lossQuantity} units, ₹${lossAmount}, ${downtimeMinutes} minutes`);
@@ -120,8 +133,9 @@ const Machine = {
                             ON CONFLICT (machine_id, date) DO UPDATE
                             SET loss_quantity = machine_loss_tracking.loss_quantity + EXCLUDED.loss_quantity,
                                 loss_amount = machine_loss_tracking.loss_amount + EXCLUDED.loss_amount,
-                                downtime_minutes = machine_loss_tracking.downtime_minutes + EXCLUDED.downtime_minutes
-                        `, [id, lossQuantity, lossAmount, downtimeMinutes, reason]);
+                                downtime_minutes = machine_loss_tracking.downtime_minutes + EXCLUDED.downtime_minutes,
+                                reason = EXCLUDED.reason
+                        `, [id, lossQuantity, lossAmount, downtimeMinutes, currentReason || reason]);
                     }
                 }
             } else if (status === 'stopped') {
@@ -145,6 +159,12 @@ const Machine = {
                     INSERT INTO machine_status_log (machine_id, previous_status, new_status, reason, changed_by, downtime_start_time, downtime_type)
                     VALUES ($1, $2, $3, $4, $5, CURRENT_TIMESTAMP, $6)
                 `, [id, oldStatus, status, reason, operatorId, isPlannedStop ? 'planned' : 'unplanned']);
+
+                // Create open downtime entry
+                await pool.query(`
+                    INSERT INTO downtime_entries (machine_id, reported_by, start_time, reason, status)
+                    VALUES ($1, $2, CURRENT_TIMESTAMP, $3, 'open')
+                `, [id, operatorId, reason || 'Unspecified']);
             } else {
                 // For maintenance
                 updateQuery = `

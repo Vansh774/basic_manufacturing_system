@@ -40,6 +40,22 @@ const updateMachineStatus = async (req, res) => {
         
         const machine = await Machine.updateStatus(parseInt(id), status, reason, operatorId);
         
+        // Emit Socket.io alert when a machine is marked as stopped
+        if (status === 'stopped') {
+            const io = req.app.get('io');
+            if (io) {
+                const alertPayload = {
+                    machine_code: machine.machine_code,
+                    machine_name: machine.name,
+                    reason: reason || machine.current_downtime_reason || 'Unspecified',
+                    timestamp: new Date().toISOString(),
+                    operator_id: operatorId
+                };
+                console.log('📡 Emitting machine_stopped_alert:', alertPayload);
+                io.emit('machine_stopped_alert', alertPayload);
+            }
+        }
+        
         res.json({ success: true, machine });
         
     } catch (error) {

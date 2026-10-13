@@ -3,7 +3,8 @@ const cors = require('cors');
 const http = require('http');
 const socketIo = require('socket.io');
 const cron = require('node-cron');
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '.env') });
 
 const authRoutes = require('./src/routes/authRoutes');
 const machineRoutes = require('./src/routes/machineRoutes');
@@ -11,6 +12,7 @@ const productionRoutes = require('./src/routes/productionRoutes');
 const downtimeRoutes = require('./src/routes/downtimeRoutes');
 const profitLossRoutes = require('./src/routes/profitLossRoutes');
 const settingsRoutes = require('./src/routes/settingsRoutes');
+const analyticsRoutes = require('./src/routes/analyticsRoutes');
 const pool = require('./src/config/db');
 
 const app = express();
@@ -34,6 +36,7 @@ app.use('/api/production', productionRoutes);
 app.use('/api/downtime', downtimeRoutes);
 app.use('/api/profit-loss', profitLossRoutes);
 app.use('/api/settings', settingsRoutes);
+app.use('/api/analytics', analyticsRoutes);
 
 // Test endpoint
 app.get('/api/test', (req, res) => {

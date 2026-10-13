@@ -171,4 +171,14 @@ export const updateSettings = async (settings) => {
     }
 };
 
+export const getDowntimeAnalyticsReport = async (range = 'today') => {
+    const response = await api.get(`/analytics/downtime?range=${range}`);
+    return response.data;
+};
+
+export const getMostStoppedMachinesReport = async (range = '1month', sortBy = 'count') => {
+    const response = await api.get(`/analytics/most-stopped?range=${range}&sortBy=${sortBy}`);
+    return response.data;
+};
+
 export default api;
