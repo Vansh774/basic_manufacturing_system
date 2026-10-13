@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 import DowntimeAnalytics from './DowntimeAnalytics';
 import MostStoppedMachines from './MostStoppedMachines';
 import AlertNotificationBell from './AlertNotificationBell';
+import FirebaseBadge from './FirebaseBadge';
 
 const ManagerDashboard = () => {
     const [machines, setMachines] = useState([]);
@@ -90,6 +91,7 @@ const ManagerDashboard = () => {
                             <p className="text-sm text-gray-600">Production Monitoring & Machine Status</p>
                         </div>
                         <div className="flex items-center space-x-4">
+                            <FirebaseBadge />
                             <AlertNotificationBell onAlert={() => { fetchData(); setAnalyticsRefreshTrigger(prev => prev + 1); }} />
                             <button
                                 onClick={fetchData}

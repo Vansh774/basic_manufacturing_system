@@ -13,6 +13,7 @@ const downtimeRoutes = require('./src/routes/downtimeRoutes');
 const profitLossRoutes = require('./src/routes/profitLossRoutes');
 const settingsRoutes = require('./src/routes/settingsRoutes');
 const analyticsRoutes = require('./src/routes/analyticsRoutes');
+const firebaseRoutes = require('./src/routes/firebaseRoutes');
 const pool = require('./src/config/db');
 
 const fs = require('fs');
@@ -47,6 +48,7 @@ app.use('/api/downtime', downtimeRoutes);
 app.use('/api/profit-loss', profitLossRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/analytics', analyticsRoutes);
+app.use('/api/firebase', firebaseRoutes);
 
 // Test endpoint
 app.get('/api/test', (req, res) => {

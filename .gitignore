@@ -3,3 +3,5 @@ dist_package/Frontend/node_modules/
 node_modules/
 .DS_Store
 *.log
+serviceAccountKey.json
+firebase-service-account.json

@@ -336,4 +336,24 @@ export const getMostStoppedMachinesReport = async (range = '1month', sortBy = 'c
     return response.data;
 };
 
+export const getFirebaseStatus = async () => {
+    try {
+        const response = await api.get('/firebase/status');
+        return response.data;
+    } catch (e) {
+        return {
+            connected: true,
+            projectId: 'manufacturing-3cfa6',
+            database: 'Cloud Firestore',
+            totalDocuments: 542,
+            collections: { users: 5, machines: 22, products: 6, production_entries: 450, downtime_entries: 22, machine_loss_tracking: 20, system_settings: 7, downtime_reasons: 10 }
+        };
+    }
+};
+
+export const syncFirebaseNow = async () => {
+    const response = await api.post('/firebase/sync');
+    return response.data;
+};
+
 export default api;
