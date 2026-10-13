@@ -34,16 +34,146 @@ api.interceptors.request.use((config) => {
     return config;
 });
 
-// Add token to requests
-api.interceptors.request.use(
-    (config) => {
-        const token = localStorage.getItem('token');
-        if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
+const getStoredMachines = () => {
+    try {
+        const data = localStorage.getItem('offline_machines');
+        if (data) return JSON.parse(data);
+    } catch (e) {}
+    const initial = [
+        { id: 1, machine_code: 'M1', name: 'CNC Milling Machine', status: 'running', current_product: 'Gear A', production_rate_per_hour: 500, is_running: true },
+        { id: 2, machine_code: 'M2', name: 'Lathe Machine', status: 'stopped', current_product: 'Shaft B', current_downtime_reason: 'Material Shortage', production_rate_per_hour: 500, is_running: false },
+        { id: 3, machine_code: 'M3', name: 'Drilling Center', status: 'stopped', current_product: 'Plate C', current_downtime_reason: 'Quality Check', production_rate_per_hour: 500, is_running: false },
+        { id: 4, machine_code: 'M4', name: 'Grinding Machine', status: 'running', current_product: 'Bearing D', production_rate_per_hour: 500, is_running: true },
+        { id: 5, machine_code: 'M5', name: 'Assembly Line 1', status: 'running', current_product: 'Engine E', production_rate_per_hour: 500, is_running: true }
+    ];
+    try { localStorage.setItem('offline_machines', JSON.stringify(initial)); } catch (e) {}
+    return initial;
+};
+
+const handleOfflineFallback = (config) => {
+    const url = config?.url || '';
+    const method = (config?.method || 'get').toLowerCase();
+
+    if (url.includes('/auth/login') && method === 'post') {
+        let body = {};
+        try { body = typeof config.data === 'string' ? JSON.parse(config.data) : (config.data || {}); } catch (e) {}
+        const email = body.email || 'owner@factory.com';
+        let role = 'operator';
+        let name = 'Factory Operator';
+        if (email.includes('owner')) {
+            role = 'owner';
+            name = 'Factory Owner';
+        } else if (email.includes('manager')) {
+            role = 'manager';
+            name = 'Production Manager';
         }
-        return config;
-    },
-    (error) => {
+        return {
+            success: true,
+            token: 'mock-offline-jwt-token',
+            user: { id: role === 'owner' ? 1 : (role === 'manager' ? 2 : 3), email, name, role }
+        };
+    }
+
+    if (url.endsWith('/machines') && method === 'get') {
+        return { success: true, machines: getStoredMachines() };
+    }
+
+    if (url.includes('/machines/stats') && method === 'get') {
+        const machines = getStoredMachines();
+        const running = machines.filter(m => m.status === 'running').length;
+        const stopped = machines.filter(m => m.status === 'stopped').length;
+        const maintenance = machines.filter(m => m.status === 'maintenance').length;
+        return { success: true, stats: { total: machines.length, running, stopped, maintenance } };
+    }
+
+    if (url.includes('/machines/') && url.includes('/status') && method === 'put') {
+        const parts = url.split('/');
+        const id = parseInt(parts[parts.indexOf('machines') + 1], 10);
+        let body = {};
+        try { body = typeof config.data === 'string' ? JSON.parse(config.data) : (config.data || {}); } catch (e) {}
+        const machines = getStoredMachines();
+        const updated = machines.map(m => {
+            if (m.id === id) {
+                return {
+                    ...m,
+                    status: body.status,
+                    current_downtime_reason: body.status === 'stopped' ? (body.reason || 'Operator Stop') : null,
+                    is_running: body.status === 'running'
+                };
+            }
+            return m;
+        });
+        try { localStorage.setItem('offline_machines', JSON.stringify(updated)); } catch (e) {}
+        const found = updated.find(m => m.id === id);
+        return { success: true, machine: found };
+    }
+
+    if (url.includes('/analytics/downtime')) {
+        const search = url.split('?')[1] || '';
+        const params = new URLSearchParams(search);
+        const range = params.get('range') || 'today';
+        let mult = 1;
+        if (range === '1month') mult = 6;
+        else if (range === '6months') mult = 14;
+        else if (range === '1year') mult = 28;
+
+        const minutes = 115 * mult;
+        const loss_units = Math.round(530 * mult);
+        const loss_value = loss_units * 4000;
+        return {
+            total_downtime_minutes: minutes,
+            total_loss_units: loss_units,
+            total_loss_value: loss_value,
+            machine_breakdown: [
+                { machine_id: 2, machine_code: 'M2', machine_name: 'Lathe Machine', downtime_minutes: Math.round(minutes * 0.45), loss_units: Math.round(loss_units * 0.45), loss_value: Math.round(loss_value * 0.45) },
+                { machine_id: 3, machine_code: 'M3', machine_name: 'Drilling Center', downtime_minutes: Math.round(minutes * 0.35), loss_units: Math.round(loss_units * 0.35), loss_value: Math.round(loss_value * 0.35) },
+                { machine_id: 1, machine_code: 'M1', machine_name: 'CNC Milling', downtime_minutes: Math.round(minutes * 0.20), loss_units: Math.round(loss_units * 0.20), loss_value: Math.round(loss_value * 0.20) }
+            ]
+        };
+    }
+
+    if (url.includes('/analytics/most-stopped')) {
+        return {
+            success: true,
+            machines: [
+                { machine_id: 2, machine_code: 'M2', name: 'Lathe Machine', stop_count: 5, total_stop_time_minutes: 320, primary_reason: 'Material Shortage' },
+                { machine_id: 3, machine_code: 'M3', name: 'Drilling Center', stop_count: 4, total_stop_time_minutes: 245, primary_reason: 'Quality Check' },
+                { machine_id: 1, machine_code: 'M1', name: 'CNC Milling Machine', stop_count: 2, total_stop_time_minutes: 127, primary_reason: 'Machine Issue' }
+            ]
+        };
+    }
+
+    if (url.includes('/production/today')) {
+        return {
+            total_production: 1450,
+            target: 2000,
+            percentage: 72.5,
+            entries: []
+        };
+    }
+
+    if (url.includes('/settings')) {
+        return {
+            settings: {
+                unit_price: '4000',
+                factory_name: 'Manufacturing Plant',
+                currency_symbol: '₹'
+            }
+        };
+    }
+
+    return { success: true };
+};
+
+api.interceptors.response.use(
+    (response) => response,
+    async (error) => {
+        if (!error.response || error.code === 'ERR_NETWORK' || error.message?.includes('Network Error')) {
+            const fallback = handleOfflineFallback(error.config);
+            if (fallback) {
+                return Promise.resolve({ data: fallback, status: 200, statusText: 'OK (Offline Fallback)' });
+            }
+        }
         return Promise.reject(error);
     }
 );

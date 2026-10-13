@@ -87,12 +87,48 @@ const Login = () => {
                     </button>
                 </form>
 
-                <div className="mt-8 pt-6 border-t border-gray-200">
-                    <p className="text-center text-sm text-gray-600 mb-2">Demo Credentials:</p>
-                    <div className="space-y-1 text-xs text-gray-500 text-center">
-                        <p>Owner: owner@factory.com / temp123</p>
-                        <p>Manager: manager@factory.com / temp123</p>
-                        <p>Operator: operator1@factory.com / temp123</p>
+                <div className="mt-6 pt-5 border-t border-gray-200">
+                    <p className="text-center text-xs font-semibold text-gray-500 mb-3 uppercase tracking-wider">Quick Demo Login (Tap to Fill)</p>
+                    <div className="grid grid-cols-3 gap-2">
+                        <button
+                            type="button"
+                            onClick={() => { setEmail('owner@factory.com'); setPassword('temp123'); }}
+                            className="py-2 px-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold rounded-lg border border-indigo-200 text-center transition"
+                        >
+                            👑 Owner
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => { setEmail('manager@factory.com'); setPassword('temp123'); }}
+                            className="py-2 px-1 bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-semibold rounded-lg border border-blue-200 text-center transition"
+                        >
+                            👔 Manager
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => { setEmail('operator1@factory.com'); setPassword('temp123'); }}
+                            className="py-2 px-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-semibold rounded-lg border border-emerald-200 text-center transition"
+                        >
+                            ⚙️ Operator
+                        </button>
+                    </div>
+
+                    <div className="mt-4 pt-3 text-center border-t border-gray-100">
+                        <button
+                            type="button"
+                            onClick={() => {
+                                const current = localStorage.getItem('api_server_url') || 'http://localhost:5000';
+                                const input = prompt('Enter Backend Server URL (e.g. http://192.168.1.100:5000 or http://localhost:5000):', current);
+                                if (input !== null && input.trim()) {
+                                    localStorage.setItem('api_server_url', input.trim());
+                                    toast.success('Server URL updated! Reloading...');
+                                    setTimeout(() => window.location.reload(), 500);
+                                }
+                            }}
+                            className="text-xs text-gray-500 hover:text-blue-600 transition inline-flex items-center gap-1 font-mono"
+                        >
+                            <span>⚙️ Backend: {localStorage.getItem('api_server_url') || 'http://localhost:5000'}</span>
+                        </button>
                     </div>
                 </div>
             </div>
