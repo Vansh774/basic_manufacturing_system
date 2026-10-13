@@ -1,12 +1,37 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5000/api';
+export const getBaseServerUrl = () => {
+    if (typeof window !== 'undefined') {
+        const stored = localStorage.getItem('api_server_url');
+        if (stored) return stored.replace(/\/+$/, '');
+        if (window.__API_SERVER_URL__) return window.__API_SERVER_URL__.replace(/\/+$/, '');
+        if (window.location && window.location.hostname) {
+            if (window.location.protocol.startsWith('http')) {
+                if (window.location.port === '5000') {
+                    return window.location.origin;
+                }
+                return `${window.location.protocol}//${window.location.hostname}:5000`;
+            }
+        }
+    }
+    return 'http://localhost:5000';
+};
+
+export const getApiUrl = () => `${getBaseServerUrl()}/api`;
 
 const api = axios.create({
-    baseURL: API_URL,
     headers: {
         'Content-Type': 'application/json',
     },
+});
+
+api.interceptors.request.use((config) => {
+    config.baseURL = getApiUrl();
+    const token = localStorage.getItem('token');
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
 });
 
 // Add token to requests

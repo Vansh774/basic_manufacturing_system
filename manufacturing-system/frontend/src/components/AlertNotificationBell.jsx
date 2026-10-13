@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { io } from 'socket.io-client';
-import toast from 'react-hot-toast';
-import { getCurrentUser } from '../services/api';
+import { getCurrentUser, getBaseServerUrl } from '../services/api';
 import { playAlertSound } from '../utils/sound';
 
 const AlertNotificationBell = ({ onAlert }) => {
@@ -26,7 +25,7 @@ const AlertNotificationBell = ({ onAlert }) => {
             return;
         }
 
-        const socket = io('http://localhost:5000', {
+        const socket = io(getBaseServerUrl(), {
             transports: ['websocket', 'polling'],
             reconnectionAttempts: 10
         });

@@ -15,11 +15,12 @@ const settingsRoutes = require('./src/routes/settingsRoutes');
 const analyticsRoutes = require('./src/routes/analyticsRoutes');
 const pool = require('./src/config/db');
 
+const fs = require('fs');
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
     cors: {
-        origin: "http://localhost:5173",
+        origin: "*",
         methods: ["GET", "POST"]
     }
 });
@@ -28,6 +29,15 @@ const io = socketIo(server, {
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Serve frontend production build if available
+const frontendDistPath = path.join(__dirname, '../frontend/dist');
+const altPublicPath = path.join(__dirname, 'public');
+if (fs.existsSync(frontendDistPath)) {
+    app.use(express.static(frontendDistPath));
+} else if (fs.existsSync(altPublicPath)) {
+    app.use(express.static(altPublicPath));
+}
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -127,6 +137,22 @@ io.on('connection', (socket) => {
 
 // Make io accessible to routes
 app.set('io', io);
+
+// SPA client fallback for non-API requests
+app.use((req, res, next) => {
+    if (req.method !== 'GET') return next();
+    if (req.path.startsWith('/api') || req.path.startsWith('/socket.io')) {
+        return next();
+    }
+    const distIndex = path.join(frontendDistPath, 'index.html');
+    const pubIndex = path.join(altPublicPath, 'index.html');
+    if (fs.existsSync(distIndex)) {
+        return res.sendFile(distIndex);
+    } else if (fs.existsSync(pubIndex)) {
+        return res.sendFile(pubIndex);
+    }
+    next();
+});
 
 // Error handling middleware
 app.use((err, req, res, next) => {

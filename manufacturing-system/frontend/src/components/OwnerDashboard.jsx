@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getMachines, getMachineStats, getTodayProduction, getProductionByDate, logout } from '../services/api';
+import { getMachines, getMachineStats, getTodayProduction, getProductionByDate, logout, getApiUrl } from '../services/api';
 import toast from 'react-hot-toast';
 import DowntimeAnalytics from './DowntimeAnalytics';
 import MostStoppedMachines from './MostStoppedMachines';
@@ -85,7 +85,7 @@ const OwnerDashboard = () => {
     const resetAllMachines = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch('http://localhost:5000/api/machines/reset', {
+            const response = await fetch(`${getApiUrl()}/machines/reset`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

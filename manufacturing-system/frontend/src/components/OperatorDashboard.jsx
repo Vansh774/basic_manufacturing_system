@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getMachines, updateMachineStatus, addProductionEntry, logout } from '../services/api';
+import { getMachines, updateMachineStatus, addProductionEntry, logout, getApiUrl } from '../services/api';
 import toast from 'react-hot-toast';
 
 const OperatorDashboard = () => {
@@ -54,7 +54,7 @@ const OperatorDashboard = () => {
             if (response.success) {
                 // If status is running and product is selected, update the product
                 if (status === 'running' && product) {
-                    await fetch(`http://localhost:5000/api/machines/${machineId}/product`, {
+                    await fetch(`${getApiUrl()}/machines/${machineId}/product`, {
                         method: 'PUT',
                         headers: {
                             'Content-Type': 'application/json',
