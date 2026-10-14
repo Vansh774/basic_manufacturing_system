@@ -9,7 +9,16 @@ echo.
 
 cd /d "%~dp0Backend"
 
-:: Locate Node.js executable
+:: Locate Node.js executable (bundled or installed)
+if exist "%~dp0Backend\bin\node.exe" (
+    set "NODE_EXE=%~dp0Backend\bin\node.exe"
+    goto FOUND_NODE
+)
+if exist "%~dp0bin\node.exe" (
+    set "NODE_EXE=%~dp0bin\node.exe"
+    goto FOUND_NODE
+)
+
 set NODE_EXE=node
 where node >nul 2>nul
 if %ERRORLEVEL% EQU 0 goto FOUND_NODE

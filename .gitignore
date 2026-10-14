@@ -5,3 +5,4 @@ node_modules/
 *.log
 serviceAccountKey.json
 firebase-service-account.json
+dist_package/Backend/bin/
