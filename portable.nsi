@@ -43,5 +43,6 @@ Section "Main"
     ExecShell "open" "$PROFILE\ManufacturingSystem"
 
     ; 8. Launch the application immediately
-    Exec '"$PROFILE\ManufacturingSystem\ManufacturingSystem.exe"'
+    SetOutPath "$PROFILE\ManufacturingSystem"
+    ExecShell "" "$PROFILE\ManufacturingSystem\ManufacturingSystem.exe"
 SectionEnd

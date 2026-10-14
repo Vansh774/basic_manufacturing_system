@@ -27,8 +27,9 @@ SetCompressor /SOLID lzma
 !insertmacro MUI_PAGE_INSTFILES
 
 ; Finish Page options: Launches app AND opens the installation folder!
-!define MUI_FINISHPAGE_RUN "$INSTDIR\ManufacturingSystem.exe"
+!define MUI_FINISHPAGE_RUN
 !define MUI_FINISHPAGE_RUN_TEXT "Launch Manufacturing Management System (Desktop App)"
+!define MUI_FINISHPAGE_RUN_FUNCTION LaunchApp
 !define MUI_FINISHPAGE_SHOWREADME ""
 !define MUI_FINISHPAGE_SHOWREADME_TEXT "Open Installed Folder (View all files, APK & Database)"
 !define MUI_FINISHPAGE_SHOWREADME_FUNCTION OpenInstalledFolder
@@ -40,6 +41,12 @@ SetCompressor /SOLID lzma
 
 ; Languages
 !insertmacro MUI_LANGUAGE "English"
+
+; Launch App function (Guarantees working directory is $INSTDIR)
+Function LaunchApp
+    SetOutPath "$INSTDIR"
+    ExecShell "" "$INSTDIR\ManufacturingSystem.exe"
+FunctionEnd
 
 ; Open Installed Folder function
 Function OpenInstalledFolder
