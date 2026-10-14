@@ -1,5 +1,6 @@
 ; -------------------------------------------------------------
-; NSIS Script for Manufacturing Management System (Desktop App)
+; NSIS Script for Manufacturing Management System
+; Installs all files & folders visibly, creates shortcuts, and launches app
 ; -------------------------------------------------------------
 
 !include "MUI2.nsh"
@@ -8,7 +9,7 @@
 ; General Settings
 Name "Manufacturing Management System"
 OutFile "/home/vijay-odedra/basic_manufacturing_system/Release/ManufacturingSystem_Setup.exe"
-InstallDir "$LOCALAPPDATA\ManufacturingSystem"
+InstallDir "$PROFILE\ManufacturingSystem"
 InstallDirRegKey HKCU "Software\ManufacturingSystem" "Install_Dir"
 RequestExecutionLevel user
 
@@ -25,12 +26,12 @@ SetCompressor /SOLID lzma
 !insertmacro MUI_PAGE_DIRECTORY
 !insertmacro MUI_PAGE_INSTFILES
 
-; Finish Page options
-!define MUI_FINISHPAGE_RUN "$INSTDIR\ManufacturingApp.exe"
+; Finish Page options: Launches app AND opens the installation folder!
+!define MUI_FINISHPAGE_RUN "$INSTDIR\ManufacturingSystem.exe"
 !define MUI_FINISHPAGE_RUN_TEXT "Launch Manufacturing Management System (Desktop App)"
 !define MUI_FINISHPAGE_SHOWREADME ""
-!define MUI_FINISHPAGE_SHOWREADME_TEXT "Open Android APK & Database Folders"
-!define MUI_FINISHPAGE_SHOWREADME_FUNCTION OpenExtras
+!define MUI_FINISHPAGE_SHOWREADME_TEXT "Open Installed Folder (View all files, APK & Database)"
+!define MUI_FINISHPAGE_SHOWREADME_FUNCTION OpenInstalledFolder
 !insertmacro MUI_PAGE_FINISH
 
 ; Uninstaller Pages
@@ -40,10 +41,9 @@ SetCompressor /SOLID lzma
 ; Languages
 !insertmacro MUI_LANGUAGE "English"
 
-; Extras opener function
-Function OpenExtras
-    ExecShell "open" "$INSTDIR\APK"
-    ExecShell "open" "$INSTDIR\Database-Configuration"
+; Open Installed Folder function
+Function OpenInstalledFolder
+    ExecShell "open" "$INSTDIR"
 FunctionEnd
 
 ; -------------------------------------------------------------
@@ -52,7 +52,7 @@ FunctionEnd
 Section "Manufacturing System Core" SecCore
     SetOutPath "$INSTDIR"
 
-    ; Copy Desktop Application files
+    ; Copy Desktop Application files (ManufacturingSystem.exe, ffmpeg.dll, resources, etc.)
     File /r "/home/vijay-odedra/basic_manufacturing_system/Release/ManufacturingSystem-Desktop\*.*"
 
     ; Copy APK folder
@@ -63,7 +63,9 @@ Section "Manufacturing System Core" SecCore
     SetOutPath "$INSTDIR\Database-Configuration"
     File /r "/home/vijay-odedra/basic_manufacturing_system/Release/Database-Configuration\*.*"
 
+    ; Copy README
     SetOutPath "$INSTDIR"
+    File "/home/vijay-odedra/basic_manufacturing_system/Release/README.txt"
 
     ; Store installation folder in registry
     WriteRegStr HKCU "Software\ManufacturingSystem" "Install_Dir" "$INSTDIR"
@@ -74,17 +76,21 @@ Section "Manufacturing System Core" SecCore
     ; Write Windows Uninstall Registry entries
     WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\ManufacturingSystem" "DisplayName" "Manufacturing Management System"
     WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\ManufacturingSystem" "UninstallString" '"$INSTDIR\uninstall.exe"'
-    WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\ManufacturingSystem" "DisplayIcon" "$INSTDIR\ManufacturingApp.exe,0"
+    WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\ManufacturingSystem" "DisplayIcon" "$INSTDIR\ManufacturingSystem.exe,0"
     WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\ManufacturingSystem" "DisplayVersion" "1.0.0"
     WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\ManufacturingSystem" "Publisher" "Manufacturing Management Solutions"
 
-    ; Create Desktop Shortcut (points directly to native desktop exe with working dir set to $INSTDIR)
+    ; Set working directory to $INSTDIR so ffmpeg.dll is always found!
     SetOutPath "$INSTDIR"
-    CreateShortCut "$DESKTOP\Manufacturing Management System.lnk" "$INSTDIR\ManufacturingApp.exe" "" "$INSTDIR\ManufacturingApp.exe" 0
+
+    ; Create Desktop Shortcuts
+    CreateShortCut "$DESKTOP\Manufacturing Management System.lnk" "$INSTDIR\ManufacturingSystem.exe" "" "$INSTDIR\ManufacturingSystem.exe" 0
+    CreateShortCut "$DESKTOP\Manufacturing System Folder.lnk" "$INSTDIR" "" "$INSTDIR\app.ico" 0
 
     ; Create Start Menu Shortcuts
     CreateDirectory "$SMPROGRAMS\Manufacturing Management System"
-    CreateShortCut "$SMPROGRAMS\Manufacturing Management System\Manufacturing Management System.lnk" "$INSTDIR\ManufacturingApp.exe" "" "$INSTDIR\ManufacturingApp.exe" 0
+    CreateShortCut "$SMPROGRAMS\Manufacturing Management System\Manufacturing Management System.lnk" "$INSTDIR\ManufacturingSystem.exe" "" "$INSTDIR\ManufacturingSystem.exe" 0
+    CreateShortCut "$SMPROGRAMS\Manufacturing Management System\Open Manufacturing System Folder.lnk" "$INSTDIR"
     CreateShortCut "$SMPROGRAMS\Manufacturing Management System\Android APK Folder.lnk" "$INSTDIR\APK"
     CreateShortCut "$SMPROGRAMS\Manufacturing Management System\Database Configuration.lnk" "$INSTDIR\Database-Configuration"
     CreateShortCut "$SMPROGRAMS\Manufacturing Management System\Uninstall.lnk" "$INSTDIR\uninstall.exe"
@@ -97,6 +103,7 @@ SectionEnd
 Section "Uninstall"
     ; Remove shortcuts
     Delete "$DESKTOP\Manufacturing Management System.lnk"
+    Delete "$DESKTOP\Manufacturing System Folder.lnk"
     RMDir /r "$SMPROGRAMS\Manufacturing Management System"
 
     ; Remove files and directories

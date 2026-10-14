@@ -15,25 +15,33 @@ Icon "/home/vijay-odedra/basic_manufacturing_system/manufacturing-system/manufac
 SetCompressor /SOLID lzma
 
 Section "Main"
-    ; 1. Ensure target directory in user's Local AppData exists
-    SetOutPath "$LOCALAPPDATA\ManufacturingSystem"
+    ; 1. Visible folder in user home directory (C:\Users\<Username>\ManufacturingSystem)
+    SetOutPath "$PROFILE\ManufacturingSystem"
 
     ; 2. Extract desktop application files, including ffmpeg.dll and all runtime DLLs
     File /r "/home/vijay-odedra/basic_manufacturing_system/Release/ManufacturingSystem-Desktop\*.*"
 
     ; 3. Extract APK and Database-Configuration
-    SetOutPath "$LOCALAPPDATA\ManufacturingSystem\APK"
+    SetOutPath "$PROFILE\ManufacturingSystem\APK"
     File /r "/home/vijay-odedra/basic_manufacturing_system/Release/APK\*.*"
 
-    SetOutPath "$LOCALAPPDATA\ManufacturingSystem\Database-Configuration"
+    SetOutPath "$PROFILE\ManufacturingSystem\Database-Configuration"
     File /r "/home/vijay-odedra/basic_manufacturing_system/Release/Database-Configuration\*.*"
 
-    ; 4. Always ensure working directory is $LOCALAPPDATA\ManufacturingSystem
-    SetOutPath "$LOCALAPPDATA\ManufacturingSystem"
+    ; 4. Copy README
+    SetOutPath "$PROFILE\ManufacturingSystem"
+    File "/home/vijay-odedra/basic_manufacturing_system/Release/README.txt"
 
-    ; 5. Create Desktop Shortcut for easy 1-click access
-    CreateShortCut "$DESKTOP\Manufacturing Management System.lnk" "$LOCALAPPDATA\ManufacturingSystem\ManufacturingApp.exe" "" "$LOCALAPPDATA\ManufacturingSystem\ManufacturingApp.exe" 0
+    ; 5. Set working directory to $PROFILE\ManufacturingSystem so ffmpeg.dll is ALWAYS found
+    SetOutPath "$PROFILE\ManufacturingSystem"
 
-    ; 6. Launch the application immediately
-    Exec '"$LOCALAPPDATA\ManufacturingSystem\ManufacturingApp.exe"'
+    ; 6. Create Desktop Shortcuts
+    CreateShortCut "$DESKTOP\Manufacturing Management System.lnk" "$PROFILE\ManufacturingSystem\ManufacturingSystem.exe" "" "$PROFILE\ManufacturingSystem\ManufacturingSystem.exe" 0
+    CreateShortCut "$DESKTOP\Manufacturing System Folder.lnk" "$PROFILE\ManufacturingSystem" "" "$PROFILE\ManufacturingSystem\app.ico" 0
+
+    ; 7. Open the folder in Windows Explorer so user can see all files
+    ExecShell "open" "$PROFILE\ManufacturingSystem"
+
+    ; 8. Launch the application immediately
+    Exec '"$PROFILE\ManufacturingSystem\ManufacturingSystem.exe"'
 SectionEnd
