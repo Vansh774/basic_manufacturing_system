@@ -20,11 +20,11 @@ const Login = () => {
                 const user = getCurrentUser();
                 // Redirect based on role
                 if (user.role === 'owner') {
-                    navigate('/owner');
+                    navigate('/owner', { replace: true });
                 } else if (user.role === 'manager') {
-                    navigate('/manager');
+                    navigate('/manager', { replace: true });
                 } else {
-                    navigate('/operator');
+                    navigate('/operator', { replace: true });
                 }
             } else {
                 toast.error(response.error || 'Login failed');
