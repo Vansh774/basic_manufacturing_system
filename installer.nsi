@@ -26,7 +26,7 @@ SetCompressor /SOLID lzma
 !insertmacro MUI_PAGE_INSTFILES
 
 ; Finish Page options
-!define MUI_FINISHPAGE_RUN "$INSTDIR\ManufacturingSystem.exe"
+!define MUI_FINISHPAGE_RUN "$INSTDIR\ManufacturingApp.exe"
 !define MUI_FINISHPAGE_RUN_TEXT "Launch Manufacturing Management System (Desktop App)"
 !define MUI_FINISHPAGE_SHOWREADME ""
 !define MUI_FINISHPAGE_SHOWREADME_TEXT "Open Android APK & Database Folders"
@@ -74,16 +74,17 @@ Section "Manufacturing System Core" SecCore
     ; Write Windows Uninstall Registry entries
     WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\ManufacturingSystem" "DisplayName" "Manufacturing Management System"
     WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\ManufacturingSystem" "UninstallString" '"$INSTDIR\uninstall.exe"'
-    WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\ManufacturingSystem" "DisplayIcon" "$INSTDIR\ManufacturingSystem.exe,0"
+    WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\ManufacturingSystem" "DisplayIcon" "$INSTDIR\ManufacturingApp.exe,0"
     WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\ManufacturingSystem" "DisplayVersion" "1.0.0"
     WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\ManufacturingSystem" "Publisher" "Manufacturing Management Solutions"
 
-    ; Create Desktop Shortcut (points directly to native desktop exe)
-    CreateShortCut "$DESKTOP\Manufacturing Management System.lnk" "$INSTDIR\ManufacturingSystem.exe" "" "$INSTDIR\ManufacturingSystem.exe" 0
+    ; Create Desktop Shortcut (points directly to native desktop exe with working dir set to $INSTDIR)
+    SetOutPath "$INSTDIR"
+    CreateShortCut "$DESKTOP\Manufacturing Management System.lnk" "$INSTDIR\ManufacturingApp.exe" "" "$INSTDIR\ManufacturingApp.exe" 0
 
     ; Create Start Menu Shortcuts
     CreateDirectory "$SMPROGRAMS\Manufacturing Management System"
-    CreateShortCut "$SMPROGRAMS\Manufacturing Management System\Manufacturing Management System.lnk" "$INSTDIR\ManufacturingSystem.exe" "" "$INSTDIR\ManufacturingSystem.exe" 0
+    CreateShortCut "$SMPROGRAMS\Manufacturing Management System\Manufacturing Management System.lnk" "$INSTDIR\ManufacturingApp.exe" "" "$INSTDIR\ManufacturingApp.exe" 0
     CreateShortCut "$SMPROGRAMS\Manufacturing Management System\Android APK Folder.lnk" "$INSTDIR\APK"
     CreateShortCut "$SMPROGRAMS\Manufacturing Management System\Database Configuration.lnk" "$INSTDIR\Database-Configuration"
     CreateShortCut "$SMPROGRAMS\Manufacturing Management System\Uninstall.lnk" "$INSTDIR\uninstall.exe"

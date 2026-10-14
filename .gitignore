@@ -7,3 +7,4 @@ serviceAccountKey.json
 firebase-service-account.json
 dist_package/Backend/bin/
 Release/ManufacturingSystem-Desktop/
+Release/ManufacturingSystem.exe

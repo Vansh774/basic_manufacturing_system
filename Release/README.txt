@@ -3,80 +3,90 @@
 ================================================================================
 Release Version : 1.0.0
 Build Date      : October 2026
-Platform        : Windows Desktop (Native Window), Android APK, Cloud & Local DB
+Platform        : Windows Desktop (Dedicated Window), Android APK, Cloud Firestore
 
 ================================================================================
- 1. RELEASE CONTENTS & EXACT FILE PATHS
+ 1. EXACT FILE LOCATIONS & WHICH EXE TO USE
 ================================================================================
 
-1) Native Desktop Application Installer (EXE):
-   File: Release\ManufacturingSystem_Setup.exe
-   Description: Complete Windows installer. Installs the native desktop app,
-   creates Desktop and Start Menu shortcuts, and automatically extracts the
-   Android APK and Database-Configuration folders.
+Folder Path:
+/home/vijay-odedra/basic_manufacturing_system/Release/
 
-2) Portable Standalone Desktop Application (No Installation Required):
-   Folder: Release\ManufacturingSystem-Desktop\
-   Executable: Release\ManufacturingSystem-Desktop\ManufacturingSystem.exe
-   Batch: Release\ManufacturingSystem-Desktop\Quick-Start.bat
-   Description: Dedicated native application window (NOT an external browser).
-   Runs self-contained with embedded backend, built frontend, and Cloud Firestore.
+Inside this folder, you have 2 easy options to run:
 
-3) Android Mobile Application (APK):
-   Folder: Release\APK\
-   File: Release\APK\ManufacturingSystem.apk
-   Guide: Release\APK\README-APK.txt
-   Description: Fully responsive Android application with hardware acceleration,
-   live alert sound, and instant server connectivity.
+--------------------------------------------------------------------------------
+OPTION 1 (FASTEST - NO INSTALLATION REQUIRED):
+--------------------------------------------------------------------------------
+File: Release/ManufacturingSystem.exe
+Size: 88 MB
 
-4) Database & Cloud Configuration:
-   Folder: Release\Database-Configuration\
-   Files:
-     - 01-create-database.sql (PostgreSQL database creation)
-     - 02-init-full-db.sql (Core schema, 22 machines, 5 users, 450 production records)
-     - 03-downtime-analytics-setup.sql (Downtime analytics, loss tracking, 20 sample records)
-     - database.env (Environment configuration file)
-     - firebase-service-account.json (Active Firebase service account credentials)
-     - setup-database.bat / setup-database.sh (Automated 1-click database setup)
-     - sync-to-firebase.bat / sync-to-firebase.sh (1-click PostgreSQL to Firestore syncer)
-     - README-Database.txt & README-Firebase.txt
+HOW IT WORKS:
+- This is a TRUE SINGLE-FILE STANDALONE EXECUTABLE.
+- You can copy or move "ManufacturingSystem.exe" ANYWHERE (Desktop, Downloads, 
+  USB drive, etc.).
+- When you double-click it, it automatically extracts all required system DLLs 
+  (including ffmpeg.dll, directx, audio libraries) and launches the native 
+  application window immediately.
+- The error "ffmpeg.dll was not found" CANNOT happen because all libraries are 
+  self-contained inside this file.
+- It also automatically places a convenient shortcut on your Desktop.
 
-================================================================================
- 2. HOW TO RUN THE DESKTOP APPLICATION
-================================================================================
+--------------------------------------------------------------------------------
+OPTION 2 (FORMAL WINDOWS SETUP INSTALLER):
+--------------------------------------------------------------------------------
+File: Release/ManufacturingSystem_Setup.exe
+Size: 88 MB
 
-METHOD A - Standard Installer:
-  1. Double-click "ManufacturingSystem_Setup.exe".
-  2. Follow the setup wizard and click "Install".
-  3. On completion, click "Finish" to launch the native desktop window.
-  4. A shortcut "Manufacturing Management System" will be created on your Desktop.
+HOW IT WORKS:
+- Complete Windows Setup Wizard.
+- Double-click to install into: %LOCALAPPDATA%\ManufacturingSystem\
+- Creates Start Menu shortcuts and a Desktop shortcut.
+- Automatically extracts the Android APK and Database Configuration folders.
+- On the final screen, check "Launch Manufacturing Management System" and click 
+  Finish to open the app.
 
-METHOD B - Portable Standalone (No Install):
-  1. Open the folder "Release\ManufacturingSystem-Desktop\".
-  2. Double-click "ManufacturingSystem.exe" (or "Quick-Start.bat").
-  3. The native window opens immediately showing the live factory dashboard.
+--------------------------------------------------------------------------------
+OPTION 3 (STANDALONE DIRECTORY WITH BATCH LAUNCHER):
+--------------------------------------------------------------------------------
+Folder: Release/ManufacturingSystem-Desktop/
+Batch:  Release/ManufacturingSystem-Desktop/Quick-Start.bat
 
-================================================================================
- 3. DEFAULT LOGIN CREDENTIALS
-================================================================================
-
-Role       | Email               | Password
------------|---------------------|---------
-Admin/Owner| owner@factory.com   | temp123
-Manager    | manager@factory.com | temp123
-Operator 1 | operator1@factory.com | temp123
-Operator 2 | operator2@factory.com | temp123
-Operator 3 | operator3@factory.com | temp123
+HOW IT WORKS:
+- Run directly from inside the folder by double-clicking "Quick-Start.bat" 
+  or "ManufacturingApp.exe".
+- All DLLs (ffmpeg.dll, vulkan, chromium libraries) are present in this folder.
 
 ================================================================================
- 4. KEY FEATURES INCLUDED
+ 2. ANDROID MOBILE APPLICATION (APK)
 ================================================================================
-✓ Native Desktop Window Application (Dedicated UI, no browser URL bar or tabs)
-✓ Real-Time Downtime Analytics (Filterable by Today, 1 Month, 6 Months, 1 Year)
-✓ Production Loss Tracking in Units & Rupees (₹4000/unit default)
-✓ Most Stopped Machine Analysis with downtime reasons & stoppage durations
-✓ Real-Time Audio Siren & Toast Alerts on Manager & Admin dashboards via Socket.io
-✓ 542 Documents Synced across 8 Cloud Firestore Collections (Firebase)
-✓ PostgreSQL 16 Support with resilient error handling and automatic reconnection
-✓ Responsive Android Mobile APK (Hardware accelerated with audio support)
+File:  Release/APK/ManufacturingSystem.apk (354 KB)
+Guide: Release/APK/README-APK.txt
+
+Features:
+- Responsive machine monitoring & operator control.
+- Real-time audio alerts & Socket.io integration.
+- Hardware accelerated WebView.
+
+================================================================================
+ 3. DATABASE & CLOUD FIRESTORE
+================================================================================
+Folder: Release/Database-Configuration/
+- All 542 records across 8 tables are PRE-EMBEDDED into the application.
+- Works 100% OFFLINE without requiring PostgreSQL to be installed!
+- When internet is available, syncs in real-time with Google Cloud Firestore 
+  (Project: manufacturing-3cfa6).
+
+================================================================================
+ 4. DEFAULT LOGIN CREDENTIALS
+================================================================================
+Role         | Email                 | Password
+-------------|-----------------------|---------
+Admin/Owner  | owner@factory.com     | temp123
+Manager      | manager@factory.com   | temp123
+Operator 1   | operator1@factory.com | temp123
+Operator 2   | operator2@factory.com | temp123
+Operator 3   | operator3@factory.com | temp123
+
+Tip: On the login screen, click the quick fill buttons ("👑 Owner", "👔 Manager", 
+or "⚙️ Operator") to automatically fill the credentials!
 ================================================================================
