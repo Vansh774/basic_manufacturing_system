@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getMachines, updateMachineStatus, addProductionEntry, logout, getApiUrl } from '../services/api';
 import toast from 'react-hot-toast';
+import FirebaseBadge from './FirebaseBadge';
 
 const OperatorDashboard = () => {
     const [machines, setMachines] = useState([]);
@@ -17,7 +18,7 @@ const OperatorDashboard = () => {
     const [pendingStatus, setPendingStatus] = useState(null);
     const navigate = useNavigate();
 
-    const products = ['Bucket', 'Cover', 'Handle', 'Lid', 'Base Plate'];
+    const products = ['Bucket', 'Cover', 'Handle', 'Lid', 'Base Plate', 'Support Bracket'];
     const shifts = ['morning', 'evening', 'night'];
     
     const downtimeReasons = [
@@ -161,17 +162,25 @@ const OperatorDashboard = () => {
 
     return (
         <div className="min-h-screen bg-gray-100">
-            <nav className="bg-white shadow-lg">
-                <div className="max-w-7xl mx-auto px-4 py-3">
-                    <div className="flex justify-between items-center">
-                        <div>
-                            <h1 className="text-2xl font-bold text-blue-600">Operator Dashboard</h1>
-                            <p className="text-sm text-gray-600">Machine Control & Production Entry</p>
+            <nav className="bg-white shadow-lg sticky top-0 z-30">
+                <div className="max-w-7xl mx-auto px-3 sm:px-4 py-2.5 sm:py-3">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-4">
+                        <div className="flex items-center justify-between w-full sm:w-auto">
+                            <div>
+                                <h1 className="text-xl sm:text-2xl font-bold text-blue-600">Operator Dashboard</h1>
+                                <p className="text-xs sm:text-sm text-gray-600">Machine Control & Production Entry</p>
+                            </div>
+                            <div className="sm:hidden flex items-center gap-1.5">
+                                <FirebaseBadge />
+                            </div>
                         </div>
-                        <div className="flex space-x-4">
+                        <div className="flex flex-wrap items-center gap-1.5 sm:gap-3 w-full sm:w-auto justify-end">
+                            <div className="hidden sm:flex items-center gap-2">
+                                <FirebaseBadge />
+                            </div>
                             <button
                                 onClick={fetchData}
-                                className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition"
+                                className="bg-green-500 text-white px-2.5 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm rounded-lg hover:bg-green-600 transition"
                             >
                                 Refresh
                             </button>
@@ -181,7 +190,7 @@ const OperatorDashboard = () => {
                                     navigate('/login');
                                     toast.success('Logged out');
                                 }}
-                                className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition"
+                                className="bg-red-500 text-white px-2.5 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm rounded-lg hover:bg-red-600 transition"
                             >
                                 Logout
                             </button>
@@ -190,49 +199,49 @@ const OperatorDashboard = () => {
                 </div>
             </nav>
 
-            <div className="max-w-7xl mx-auto px-4 py-8">
+            <div className="max-w-7xl mx-auto px-2.5 sm:px-4 py-4 sm:py-8">
                 {/* Instructions Card */}
-                <div className="bg-blue-50 rounded-lg shadow p-6 mb-8 border border-blue-200">
+                <div className="bg-blue-50 rounded-xl shadow p-4 sm:p-6 mb-6 sm:mb-8 border border-blue-200">
                     <div className="flex items-center">
-                        <div className="text-3xl mr-4">🔧</div>
+                        <div className="text-2xl sm:text-3xl mr-3 sm:mr-4">🔧</div>
                         <div>
-                            <h2 className="text-lg font-semibold text-blue-800">Operator Instructions</h2>
-                            <p className="text-sm text-blue-600">When starting a machine, you will be prompted to select the product you will be producing.</p>
+                            <h2 className="text-base sm:text-lg font-semibold text-blue-800">Operator Instructions</h2>
+                            <p className="text-xs sm:text-sm text-blue-600">When starting a machine, you will be prompted to select the product you will be producing.</p>
                         </div>
                     </div>
                 </div>
 
                 {/* Machines Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                     {machines.map((machine) => (
-                        <div key={machine.id} className="bg-white rounded-lg shadow-lg overflow-hidden">
-                            <div className="p-6">
+                        <div key={machine.id} className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100">
+                            <div className="p-4 sm:p-6">
                                 <div className="flex justify-between items-start mb-4">
                                     <div>
-                                        <h3 className="text-xl font-bold text-gray-800">{machine.name}</h3>
-                                        <p className="text-sm text-gray-500">Code: {machine.machine_code}</p>
-                                        <p className="text-xs text-gray-400 mt-1">
+                                        <h3 className="text-lg sm:text-xl font-bold text-gray-800">{machine.name}</h3>
+                                        <p className="text-xs sm:text-sm text-gray-500">Code: {machine.machine_code}</p>
+                                        <p className="text-xs text-gray-400 mt-0.5">
                                             Rate: {machine.production_rate_per_hour} units/hour
                                         </p>
                                         {machine.current_product && (
-                                            <p className="text-xs text-blue-600 mt-1">
+                                            <p className="text-xs text-blue-600 mt-0.5 font-medium">
                                                 Current Product: {machine.current_product}
                                             </p>
                                         )}
                                     </div>
-                                    <div className={`px-3 py-1 rounded-full text-white font-bold ${getStatusColor(machine.status)}`}>
+                                    <div className={`px-2.5 py-1 rounded-full text-xs font-bold ${getStatusColor(machine.status)}`}>
                                         {getStatusText(machine.status)}
                                     </div>
                                 </div>
 
                                 {/* Today's Loss Display */}
                                 {machine.status === 'stopped' && machine.today_loss_quantity > 0 && (
-                                    <div className="mb-4 p-3 bg-red-50 rounded-lg border border-red-200">
-                                        <p className="text-sm text-red-600 font-semibold">
+                                    <div className="mb-3 p-2.5 bg-red-50 rounded-lg border border-red-200">
+                                        <p className="text-xs sm:text-sm text-red-600 font-semibold">
                                             ⚠️ Today's Loss: {machine.today_loss_quantity} units
                                         </p>
                                         {machine.current_downtime_reason && (
-                                            <p className="text-xs text-red-500 mt-1">
+                                            <p className="text-xs text-red-500 mt-0.5">
                                                 Reason: {machine.current_downtime_reason}
                                             </p>
                                         )}
@@ -240,11 +249,11 @@ const OperatorDashboard = () => {
                                 )}
 
                                 {/* Control Buttons */}
-                                <div className="grid grid-cols-3 gap-2 mt-4">
+                                <div className="grid grid-cols-3 gap-1.5 sm:gap-2 mt-4">
                                     <button
                                         onClick={() => handleRunningClick(machine)}
                                         disabled={machine.status === 'running'}
-                                        className={`px-3 py-2 rounded-lg text-white font-semibold transition ${
+                                        className={`px-2 py-2 sm:px-3 sm:py-2 text-xs sm:text-sm rounded-lg text-white font-semibold transition ${
                                             machine.status === 'running'
                                                 ? 'bg-green-300 cursor-not-allowed'
                                                 : 'bg-green-500 hover:bg-green-600'
@@ -255,7 +264,7 @@ const OperatorDashboard = () => {
                                     <button
                                         onClick={() => handleStopClick(machine)}
                                         disabled={machine.status === 'stopped'}
-                                        className={`px-3 py-2 rounded-lg text-white font-semibold transition ${
+                                        className={`px-2 py-2 sm:px-3 sm:py-2 text-xs sm:text-sm rounded-lg text-white font-semibold transition ${
                                             machine.status === 'stopped'
                                                 ? 'bg-red-300 cursor-not-allowed'
                                                 : 'bg-red-500 hover:bg-red-600'
@@ -266,7 +275,7 @@ const OperatorDashboard = () => {
                                     <button
                                         onClick={() => handleMaintenanceClick(machine)}
                                         disabled={machine.status === 'maintenance'}
-                                        className={`px-3 py-2 rounded-lg text-white font-semibold transition ${
+                                        className={`px-2 py-2 sm:px-3 sm:py-2 text-xs sm:text-sm rounded-lg text-white font-semibold transition ${
                                             machine.status === 'maintenance'
                                                 ? 'bg-yellow-300 cursor-not-allowed'
                                                 : 'bg-yellow-500 hover:bg-yellow-600'

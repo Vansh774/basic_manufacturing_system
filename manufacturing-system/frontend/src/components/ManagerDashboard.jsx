@@ -90,25 +90,33 @@ const ManagerDashboard = () => {
 
     return (
         <div className="min-h-screen bg-gray-100">
-            <nav className="bg-white shadow-lg">
-                <div className="max-w-7xl mx-auto px-4 py-3">
-                    <div className="flex justify-between items-center">
-                        <div>
-                            <h1 className="text-2xl font-bold text-blue-600">Manager Dashboard</h1>
-                            <p className="text-sm text-gray-600">Production Monitoring & Machine Status</p>
+            <nav className="bg-white shadow-lg sticky top-0 z-30">
+                <div className="max-w-7xl mx-auto px-3 sm:px-4 py-2.5 sm:py-3">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-4">
+                        <div className="flex items-center justify-between w-full sm:w-auto">
+                            <div>
+                                <h1 className="text-xl sm:text-2xl font-bold text-blue-600">Manager Dashboard</h1>
+                                <p className="text-xs sm:text-sm text-gray-600">Production Monitoring & Machine Status</p>
+                            </div>
+                            <div className="sm:hidden flex items-center gap-1.5">
+                                <FirebaseBadge />
+                                <AlertNotificationBell onAlert={() => { fetchData(); setAnalyticsRefreshTrigger(prev => prev + 1); }} />
+                            </div>
                         </div>
-                        <div className="flex items-center space-x-4">
-                            <FirebaseBadge />
-                            <AlertNotificationBell onAlert={() => { fetchData(); setAnalyticsRefreshTrigger(prev => prev + 1); }} />
+                        <div className="flex flex-wrap items-center gap-1.5 sm:gap-3 w-full sm:w-auto justify-end">
+                            <div className="hidden sm:flex items-center gap-2">
+                                <FirebaseBadge />
+                                <AlertNotificationBell onAlert={() => { fetchData(); setAnalyticsRefreshTrigger(prev => prev + 1); }} />
+                            </div>
                             <button
                                 onClick={fetchData}
-                                className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition"
+                                className="bg-green-500 text-white px-2.5 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm rounded-lg hover:bg-green-600 transition"
                             >
                                 Refresh
                             </button>
                             <button
                                 onClick={handleLogout}
-                                className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition"
+                                className="bg-red-500 text-white px-2.5 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm rounded-lg hover:bg-red-600 transition"
                             >
                                 Logout
                             </button>
@@ -117,37 +125,37 @@ const ManagerDashboard = () => {
                 </div>
             </nav>
 
-            <div className="max-w-7xl mx-auto px-4 py-8">
+            <div className="max-w-7xl mx-auto px-2.5 sm:px-4 py-4 sm:py-8">
                 {/* Stats Cards - No Loss Card */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                    <div className="bg-white rounded-lg shadow p-6">
-                        <div className="text-gray-500 text-sm mb-1">Total Machines</div>
-                        <div className="text-3xl font-bold text-blue-600">{(stats && stats.total !== undefined && stats.total !== null) ? stats.total : (machines.length || 22)}</div>
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-6 mb-6 sm:mb-8">
+                    <div className="bg-white rounded-xl shadow p-3.5 sm:p-6">
+                        <div className="text-gray-500 text-xs sm:text-sm mb-1">Total Machines</div>
+                        <div className="text-2xl sm:text-3xl font-bold text-blue-600">{(stats && stats.total !== undefined && stats.total !== null) ? stats.total : (machines.length || 22)}</div>
                     </div>
-                    <div className="bg-white rounded-lg shadow p-6">
-                        <div className="text-gray-500 text-sm mb-1">Running</div>
-                        <div className="text-3xl font-bold text-green-600">{(stats && stats.running !== undefined && stats.running !== null) ? stats.running : (machines.filter(m => m.status === 'running').length || 14)}</div>
+                    <div className="bg-white rounded-xl shadow p-3.5 sm:p-6">
+                        <div className="text-gray-500 text-xs sm:text-sm mb-1">Running</div>
+                        <div className="text-2xl sm:text-3xl font-bold text-green-600">{(stats && stats.running !== undefined && stats.running !== null) ? stats.running : (machines.filter(m => m.status === 'running').length || 14)}</div>
                     </div>
-                    <div className="bg-white rounded-lg shadow p-6">
-                        <div className="text-gray-500 text-sm mb-1">Stopped</div>
-                        <div className="text-3xl font-bold text-red-600">{(stats && stats.stopped !== undefined && stats.stopped !== null) ? stats.stopped : (machines.filter(m => m.status === 'stopped').length || 8)}</div>
+                    <div className="bg-white rounded-xl shadow p-3.5 sm:p-6">
+                        <div className="text-gray-500 text-xs sm:text-sm mb-1">Stopped</div>
+                        <div className="text-2xl sm:text-3xl font-bold text-red-600">{(stats && stats.stopped !== undefined && stats.stopped !== null) ? stats.stopped : (machines.filter(m => m.status === 'stopped').length || 8)}</div>
                     </div>
-                    <div className="bg-white rounded-lg shadow p-6">
-                        <div className="text-gray-500 text-sm mb-1">Maintenance</div>
-                        <div className="text-3xl font-bold text-yellow-600">{(stats && stats.maintenance !== undefined && stats.maintenance !== null) ? stats.maintenance : 0}</div>
+                    <div className="bg-white rounded-xl shadow p-3.5 sm:p-6">
+                        <div className="text-gray-500 text-xs sm:text-sm mb-1">Maintenance</div>
+                        <div className="text-2xl sm:text-3xl font-bold text-yellow-600">{(stats && stats.maintenance !== undefined && stats.maintenance !== null) ? stats.maintenance : 0}</div>
                     </div>
                 </div>
 
                 {/* Production Summary Card - No Loss */}
-                <div className="bg-white rounded-lg shadow p-6 mb-8">
-                    <div className="flex justify-between items-center">
+                <div className="bg-white rounded-xl shadow p-4 sm:p-6 mb-6 sm:mb-8">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                         <div>
-                            <div className="text-gray-500 text-sm mb-1">Today's Production</div>
-                            <div className="text-4xl font-bold text-purple-600">{formatNumber(todayProduction)} units</div>
+                            <div className="text-gray-500 text-xs sm:text-sm mb-1">Today's Production</div>
+                            <div className="text-2xl sm:text-4xl font-bold text-purple-600">{formatNumber(todayProduction)} units</div>
                         </div>
-                        <div className="text-right">
-                            <div className="text-gray-500 text-sm">Daily Target: 10,000 units</div>
-                            <div className="w-48 h-2 bg-gray-200 rounded-full mt-2">
+                        <div className="w-full sm:w-auto text-left sm:text-right">
+                            <div className="text-gray-500 text-xs sm:text-sm">Daily Target: 10,000 units</div>
+                            <div className="w-full sm:w-48 h-2 bg-gray-200 rounded-full mt-2">
                                 <div 
                                     className="h-2 bg-purple-600 rounded-full"
                                     style={{ width: `${Math.min((todayProduction / 10000) * 100, 100)}%` }}
