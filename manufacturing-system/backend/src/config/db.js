@@ -12,8 +12,7 @@ const pool = new Pool({
 
 // Test connection and handle errors
 pool.on('error', (err) => {
-    console.error('Unexpected error on idle client', err);
-    process.exit(-1);
+    console.error('PostgreSQL client error (idle):', err.message);
 });
 
 // Export pool directly

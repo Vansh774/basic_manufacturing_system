@@ -6,3 +6,4 @@ node_modules/
 serviceAccountKey.json
 firebase-service-account.json
 dist_package/Backend/bin/
+Release/ManufacturingSystem-Desktop/

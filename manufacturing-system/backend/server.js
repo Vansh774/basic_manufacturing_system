@@ -167,6 +167,13 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = process.env.PORT || 5000;
+server.on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+        console.warn(`\n⚠️ Port ${PORT} is already in use by another instance. Reusing active instance.`);
+    } else {
+        console.error('\n❌ Server error:', err.message);
+    }
+});
 server.listen(PORT, () => {
     console.log(`\n🚀 Manufacturing System API running on http://localhost:${PORT}`);
     console.log(`\n📋 Available endpoints:`);
