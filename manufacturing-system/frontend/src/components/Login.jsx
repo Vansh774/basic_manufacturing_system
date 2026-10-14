@@ -27,10 +27,11 @@ const Login = () => {
                     navigate('/operator');
                 }
             } else {
-                toast.error('Login failed');
+                toast.error(response.error || 'Login failed');
             }
         } catch (error) {
-            toast.error('Invalid credentials');
+            const msg = error.response?.data?.error || error.response?.data?.details || error.message || 'Invalid credentials';
+            toast.error(msg);
         } finally {
             setLoading(false);
         }
