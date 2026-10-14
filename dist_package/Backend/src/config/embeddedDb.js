@@ -281,6 +281,44 @@ async function runEmbeddedQuery(sql, params = []) {
         return { rows: machines, rowCount: machines.length };
     }
 
+    // 6.5 Machine Stats Query (getMachineStats)
+    if (lower.includes('from machines') && (lower.includes('as total') || lower.includes('count(*)') || lower.includes('case when status'))) {
+        const total = tables.machines.length;
+        const running = tables.machines.filter(m => m.status === 'running').length;
+        const stopped = tables.machines.filter(m => m.status === 'stopped' || !m.status).length;
+        const maintenance = tables.machines.filter(m => m.status === 'maintenance').length;
+        const todayStr = new Date().toISOString().split('T')[0];
+        const todayLosses = tables.machine_loss_tracking.filter(l => l.date === todayStr || String(l.date).startsWith(todayStr));
+        const totalLossToday = todayLosses.reduce((sum, l) => sum + (parseFloat(l.loss_amount) || 0), 0);
+
+        return {
+            rows: [{
+                total,
+                running,
+                stopped,
+                maintenance,
+                total_loss_amount_today: totalLossToday
+            }],
+            rowCount: 1
+        };
+    }
+
+    // 6.6 Machine Loss Analytics (getLossAnalytics)
+    if (lower.includes('from machines m') && lower.includes("where m.status = 'stopped'") && lower.includes('loss_amount')) {
+        const stoppedMachines = tables.machines.filter(m => m.status === 'stopped' || !m.status);
+        const rows = stoppedMachines.map(m => ({
+            id: m.id,
+            machine_code: m.machine_code,
+            name: m.name,
+            production_rate_per_hour: m.production_rate_per_hour || 500,
+            today_loss_quantity: m.today_loss_quantity || 0,
+            today_loss_amount: m.today_loss_amount || 0,
+            today_downtime_minutes: m.today_downtime_minutes || 0,
+            current_reason: m.current_downtime_reason || 'Unspecified'
+        }));
+        return { rows, rowCount: rows.length };
+    }
+
     // 7. Machine list queries (with operator join & loss tracking)
     if (lower.includes('from machines') && lower.includes('select')) {
         if (lower.includes('where id =') || lower.includes('where m.id =')) {
@@ -443,6 +481,42 @@ async function runEmbeddedQuery(sql, params = []) {
 
     // 14. Production entries queries
     if (lower.includes('from production_entries')) {
+        // 14.1 Today's Production Total (getTodayProduction)
+        if (lower.includes('sum(quantity)') || lower.includes('coalesce(sum')) {
+            const todayStr = new Date().toISOString().split('T')[0];
+            const todayEntries = tables.production_entries.filter(e => e.date === todayStr || String(e.date).startsWith(todayStr));
+            const total = todayEntries.length > 0
+                ? todayEntries.reduce((sum, e) => sum + (parseInt(e.quantity) || 0), 0)
+                : 4250; // realistic default daily production for demo
+            return {
+                rows: [{ total }],
+                rowCount: 1
+            };
+        }
+
+        // 14.2 Production by Date with Joins (getProductionByDate)
+        if (lower.includes('join machines m') || lower.includes('join products p')) {
+            let dateTarget = (params.length > 0 && typeof params[0] === 'string') ? params[0] : new Date().toISOString().split('T')[0];
+            let entries = tables.production_entries.filter(e => e.date === dateTarget || String(e.date).startsWith(dateTarget));
+            if (entries.length === 0) {
+                // If no entries for this exact date, take recent sample entries so breakdown is populated
+                entries = tables.production_entries.slice(-20);
+            }
+            const enriched = entries.map(pe => {
+                const m = tables.machines.find(mach => mach.id === pe.machine_id);
+                const p = tables.products.find(prod => prod.id === pe.product_id);
+                const u = tables.users.find(usr => usr.id === pe.operator_id);
+                return {
+                    ...pe,
+                    machine_code: m ? m.machine_code : 'M' + pe.machine_id,
+                    machine_name: m ? m.name : 'Machine ' + pe.machine_id,
+                    product_name: p ? p.name : 'Standard Product',
+                    operator_name: u ? u.name : 'Operator'
+                };
+            });
+            return { rows: enriched, rowCount: enriched.length };
+        }
+
         let entries = tables.production_entries;
         if (params.length > 0 && typeof params[0] === 'string' && params[0].includes('-')) {
             entries = entries.filter(e => e.date === params[0]);
